@@ -11,6 +11,9 @@ symptoms:
   - EBUSY / Access is denied / sharing violation when deleting temp dirs or git worktrees
   - Lingering background daemons (node, python, postgres, test servers) holding ports or file locks
   - Agent kills a still-active tool binary because its versioned path looks old behind a mise/scoop junction
+  - "database is locked on local SQLite/DuckDB files held by an orphaned worker after parent daemon exit"
+  - Removing a git worktree breaks another live agent session whose CWD is inside it, or leaves a half-deleted directory on long paths
+  - Windows Named Pipe daemon recovery connects new clients to a dying wedged instance
 ---
 
 # Orphan File-Locking Processes & MSYS `rm -rf` Junction Failures
@@ -78,3 +81,6 @@ Process termination and directory deletion are not reversible; always confirm th
 
 - Shared worker daemons spawned by coding agents may intentionally have an exited parent PID (orphan-looking PPID) because they are detached and shared across sessions; always check command line and active session ownership before killing.
 - Never run `Remove-Item -Recurse` on a directory containing junctions in legacy Windows PowerShell 5.1 without verifying junction handling; `cmd /c rmdir /s /q` removes junctions safely without deleting junction targets.
+- **Check process working directories (PEB CWD), not just `CommandLine`, before removing a git worktree**: Background agent processes (`node`, `codex`, `claude`) frequently sit with a worktree as their current directory without mentioning the path in `CommandLine`. Removing the worktree breaks those sessions, and if `git worktree remove` hits a long path mid-delete it unregisters the worktree while leaving a half-deleted directory behind.
+- **Windows Named Pipe (`\\.\pipe\...`) recovery race**: If a replacement daemon starts before the wedged old process fully releases its pipe instance, new client requests still connect to the dying process and hang. Always terminate and wait for full PID exit (`Wait-Process`) before respawning a Named Pipe server.
+- **Orphaned SQLite/DuckDB lock workers**: When a parent daemon exits ungracefully on Windows without a Job Object (`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`), detached child workers survive with a dead `ParentProcessId` and hold exclusive locks on `.sqlite`/`.duckdb` files (`database is locked`) until explicitly stopped.
