@@ -7,7 +7,7 @@ shell: powershell
 reversible: true
 applies_to: Windows 10/11 with multiple WSL2 distros (Docker Desktop, Rancher, Alpine, Ubuntu)
 symptoms:
-  - "wsl -- bash -lc ..." executes inside BusyBox /bin/sh or fails with "ps: unrecognized option"
+  - 'wsl -- bash -lc ... executes inside BusyBox /bin/sh or fails with "ps: unrecognized option"'
   - Bare "wsl" launches docker-desktop or an unexpected minimal distro instead of Ubuntu/Debian
   - Scripts assuming GNU coreutils or bash fail silently or exit 1 under wsl.exe without -d
 ---
