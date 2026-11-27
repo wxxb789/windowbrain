@@ -7,7 +7,7 @@ shell: powershell
 reversible: true
 applies_to: Windows 10/11 enterprise/corporate dev machines with internal npm/pnpm/Cargo/PyPI mirrors
 symptoms:
-  - "ERR_PNPM_TARBALL_URL_MISMATCH" in public GitHub Actions CI after editing dependencies on Windows
+  - 'ERR_PNPM_TARBALL_URL_MISMATCH in public GitHub Actions CI after editing dependencies on Windows'
   - pnpm-lock.yaml or package-lock.json contains private/internal feed tarball URLs or sha1 integrity hashes
   - Local "pnpm install --frozen-lockfile" passes while public CI rejects the lockfile
 ---

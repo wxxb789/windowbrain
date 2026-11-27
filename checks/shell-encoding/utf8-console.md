@@ -7,7 +7,7 @@ shell: powershell
 reversible: true
 applies_to: Windows 10/11
 symptoms:
-  - UnicodeEncodeError: 'gbk' or 'charmap' codec can't encode character
+  - "UnicodeEncodeError: 'gbk' or 'charmap' codec can't encode character"
   - Mojibake / garbled non-ASCII output in agent tool logs
   - Git shows octal-escaped paths like \344\270\255 instead of UTF-8 filenames
 ---

@@ -10,6 +10,8 @@ symptoms:
   - "compile: version \"go1.x.y\" does not match go tool version \"go1.x.z\""
   - Agent invokes wrong node / python / go / bun version despite mise.toml or .tool-versions
   - Tool works in interactive PowerShell but fails with command not found or wrong version in Git Bash / agent subshell
+  - "mise ERROR No version is set for shim: <tool> when agents run outside a directory with mise.toml"
+  - "mise WARN failed to write cache file: ...\\exec_env_*.msgpack.z Access is denied. (os error 5) during concurrent agent runs"
 ---
 
 # `mise` / System `PATH` Ordering & Cross-Shell Toolchain Drift
@@ -76,3 +78,5 @@ Remove `%LOCALAPPDATA%\mise\shims` from User `Path` if added in Step 2.
 
 - Because Windows concatenates `Machine PATH + User PATH`, modifying User `PATH` alone CANNOT override a binary in `C:\Program Files\...` (Machine `PATH`). Using `mise exec -- <cmd>` or `mise activate` dynamically prepends the pinned install directory to the process `PATH`, cleanly overriding Machine `PATH` without requiring Admin rights.
 - In Git Bash, `PATH` entries use POSIX conversion; prefer `mise exec --` for identical behavior across PowerShell, CMD, and Git Bash.
+- **Unpinned global shims**: When agents invoke tools from temp dirs or worktrees without a local `mise.toml`, shims fail with `mise ERROR No version is set for shim: <tool>`. Pin global defaults with `mise use -g <tool>@<version>`.
+- **Concurrent `mise` cache lock (`os error 5`)**: Parallel agent invocations on Windows can collide when atomically replacing `exec_env_*.msgpack.z` under `MISE_CACHE_DIR`. Isolate `MISE_CACHE_DIR` per worker or resolve the binary once with `mise which <tool>` before fanning out child processes.
